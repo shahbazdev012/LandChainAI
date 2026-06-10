@@ -1,75 +1,193 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { dashboard, login } from '@/routes';
-import { register } from '@/routes';
+import { ShieldCheck, FileCheck, Search, Link as LinkIcon, CheckCircle2 } from '@lucide/vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import PublicLayout from '@/layouts/PublicLayout.vue';
+
 </script>
 
 <template>
-    <Head title="Welcome to LanChain AI">
-        <link rel="preconnect" href="https://rsms.me/" />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-    </Head>
-    <div
-        class="flex min-h-screen flex-col items-center bg-[#F8FAFC] p-6 text-[#0F172A] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]"
-    >
-        <header
-            class="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl"
-        >
-            <nav class="flex items-center justify-end gap-4">
-                <Link
-                    v-if="$page.props.auth.user"
-                    :href="dashboard()"
-                    class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                >
-                    Dashboard
+    <PublicLayout>
+        <Head title="LanChain AI - Smart Property Registration & Verification" />
+        
+        <!-- Hero Section -->
+        <section class="relative px-6 md:px-12 py-20 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden">
+            <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:100px_100px]"></div>
+            
+            <Badge class="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" variant="outline">
+                <span class="flex items-center gap-1.5"><ShieldCheck class="w-4 h-4" /> Secure & Transparent</span>
+            </Badge>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold text-foreground tracking-tight mb-6 max-w-4xl">
+                The Future of <span class="text-primary">Property Registration</span> & Verification
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
+                LanChain AI leverages Blockchain and AI to eliminate fraud, ensuring smart, transparent, and secure property transactions.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <Link href="/register-property">
+                    <Button size="lg" class="w-full sm:w-auto h-14 px-8 text-lg bg-primary hover:bg-primary/95 text-white shadow-xl shadow-primary/20">
+                        Register Property
+                    </Button>
                 </Link>
-                <template v-else>
-                    <Link
-                        :href="login()"
-                        class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                    >
-                        Log in
-                    </Link>
-                    <Link
-                        :href="register()"
-                        class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                    >
-                        Register
-                    </Link>
-                </template>
-            </nav>
-        </header>
-        <div
-            class="flex flex-1 w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0"
-        >
-            <main
-                class="flex w-full flex-col items-center text-center justify-center lg:max-w-4xl"
-            >
-                <div class="mb-10">
-                    <div class="h-16 w-16 bg-[#0F4C81] text-white rounded-2xl flex items-center justify-center font-bold text-3xl mx-auto mb-6 shadow-lg">L</div>
-                    <h1 class="text-4xl font-bold text-[#0F172A] dark:text-white mb-4">LanChain AI</h1>
-                    <p class="text-xl text-[#64748B] dark:text-[#94A3B8] max-w-2xl mx-auto">
-                        Smart Property Registration and Verification System
-                    </p>
+                <Link href="/verify">
+                    <Button size="lg" variant="outline" class="w-full sm:w-auto h-14 px-8 text-lg border-2">
+                        Verify Property
+                    </Button>
+                </Link>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="px-6 md:px-12 py-20 bg-secondary/30">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">Core Capabilities</h2>
+                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Our platform provides end-to-end security and ease of use for governments, buyers, and sellers.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left">
-                    <div class="p-8 bg-white dark:bg-[#161615] rounded-xl border border-[#19140035] dark:border-[#3E3E3A] shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
-                        <div class="h-12 w-12 bg-[#16A34A]/10 text-[#16A34A] rounded-xl flex items-center justify-center mb-6">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <FileCheck class="w-7 h-7" />
                         </div>
-                        <h3 class="text-xl font-semibold text-[#0F172A] dark:text-[#EDEDEC] mb-3">Secure Verification</h3>
-                        <p class="text-[#64748B] dark:text-[#A1A09A] leading-relaxed">Blockchain-backed property records ensure authenticity and prevent fraud in real estate transactions.</p>
+                        <h3 class="text-xl font-semibold mb-3">Smart Registration</h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">Digitize the entire property registration workflow, removing bottlenecks and excessive paperwork.</p>
                     </div>
-                    <div class="p-8 bg-white dark:bg-[#161615] rounded-xl border border-[#19140035] dark:border-[#3E3E3A] shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
-                        <div class="h-12 w-12 bg-[#0F4C81]/10 text-[#0F4C81] rounded-xl flex items-center justify-center mb-6">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    
+                    <!-- Feature 2 -->
+                    <div class="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-success/10 text-success flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <Search class="w-7 h-7" />
                         </div>
-                        <h3 class="text-xl font-semibold text-[#0F172A] dark:text-[#EDEDEC] mb-3">Smart Registration</h3>
-                        <p class="text-[#64748B] dark:text-[#A1A09A] leading-relaxed">Streamlined digital property registration process saving time and eliminating cumbersome paperwork.</p>
+                        <h3 class="text-xl font-semibold mb-3">AI Verification (Concept)</h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">AI-driven document analysis to detect inconsistencies and forgery in real-time before approval.</p>
+                    </div>
+                    
+                    <!-- Feature 3 -->
+                    <div class="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <LinkIcon class="w-7 h-7" />
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">Blockchain Security (Concept)</h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">Records are hashed and placed on an immutable ledger, ensuring data integrity forever.</p>
+                    </div>
+                    
+                    <!-- Feature 4 -->
+                    <div class="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-warning/10 text-warning flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <ShieldCheck class="w-7 h-7" />
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">Fraud Prevention</h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">Eradicate property scams through biometric checks and multi-party cryptographic signatures.</p>
                     </div>
                 </div>
-            </main>
-        </div>
-        <div class="hidden h-14.5 lg:block"></div>
-    </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="px-6 md:px-12 py-20 md:py-28">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center gap-16">
+                    <div class="w-full md:w-1/2">
+                        <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-6">How LanChain AI Works</h2>
+                        <p class="text-lg text-muted-foreground mb-10 leading-relaxed">
+                            A simple, secure, and modern approach to property management. Follow these steps to register or verify a property natively on our platform.
+                        </p>
+                        
+                        <div class="space-y-8">
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                                    <div class="w-0.5 h-full bg-border mt-2"></div>
+                                </div>
+                                <div class="pb-2">
+                                    <h4 class="text-xl font-semibold mb-2">Submit Property Details</h4>
+                                    <p class="text-muted-foreground text-sm">Upload ownership documents, ID proofs, and structural details via our secure portal.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                                    <div class="w-0.5 h-full bg-border mt-2"></div>
+                                </div>
+                                <div class="pb-2">
+                                    <h4 class="text-xl font-semibold mb-2">AI Document Verification</h4>
+                                    <p class="text-muted-foreground text-sm">Our AI models automatically cross-reference data against national databases and check for anomalies.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                                    <div class="w-0.5 h-full bg-border mt-2"></div>
+                                </div>
+                                <div class="pb-2">
+                                    <h4 class="text-xl font-semibold mb-2">Blockchain Hash & Store</h4>
+                                    <p class="text-muted-foreground text-sm">Once approved, details are cryptographically hashed and committed to our ledger.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">4</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-semibold mb-2">Public Verification Access</h4>
+                                    <p class="text-muted-foreground text-sm">Anyone can instantly verify the authenticity of a property title by searching its unique ID.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-1/2 bg-card border border-border p-8 rounded-3xl shadow-xl">
+                        <!-- Mockup UI representation -->
+                        <div class="flex items-center gap-3 border-b border-border pb-4 mb-6">
+                            <div class="w-3 h-3 rounded-full bg-destructive"></div>
+                            <div class="w-3 h-3 rounded-full bg-warning"></div>
+                            <div class="w-3 h-3 rounded-full bg-success"></div>
+                            <div class="ml-4 h-6 w-3/4 bg-secondary rounded-md"></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="h-10 bg-secondary rounded-lg w-full flex items-center px-4">
+                                <Search class="w-4 h-4 text-muted-foreground mr-2" />
+                                <span class="text-sm text-muted-foreground">Enter Property Hash ID...</span>
+                            </div>
+                            <div class="h-32 bg-primary/5 border border-primary/20 rounded-lg flex flex-col items-center justify-center mt-6">
+                                <CheckCircle2 class="w-10 h-10 text-success mb-2" />
+                                <span class="font-semibold text-primary">Property Verified Authentic</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div class="h-20 bg-secondary rounded-lg"></div>
+                                <div class="h-20 bg-secondary rounded-lg"></div>
+                                <div class="h-20 bg-secondary rounded-lg"></div>
+                                <div class="h-20 bg-secondary rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20 bg-primary text-primary-foreground text-center px-6 md:px-12">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">Ready to secure your assets?</h2>
+            <p class="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
+                Join thousands who have already migrated to the most transparent and secure property registration standard.
+            </p>
+            <div class="flex justify-center gap-4">
+                <Link href="/register">
+                    <Button size="lg" class="bg-white text-primary hover:bg-white/90 h-14 px-8 text-lg font-semibold">
+                        Create an Account
+                    </Button>
+                </Link>
+            </div>
+        </section>
+
+    </PublicLayout>
 </template>
