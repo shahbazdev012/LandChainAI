@@ -9,14 +9,14 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
 <template>
     <PublicLayout>
-        <Head title="Contact Us - LanChain AI" />
+        <Head title="Contact Us - LandChain AI" />
 
         <section class="max-w-7xl mx-auto px-6 md:px-12 py-20 flex flex-col md:flex-row gap-16">
             <!-- Contact Info -->
             <div class="w-full md:w-1/3">
                 <h1 class="text-4xl font-bold text-foreground mb-6">Get in Touch</h1>
                 <p class="text-muted-foreground mb-10 leading-relaxed">
-                    Have questions about our smart verification process or want to integrate LanChain AI into your government registry? Reach out to our team.
+                    Have questions about our smart verification process or want to integrate LandChain AI into your government registry? Reach out to our team.
                 </p>
 
                 <div class="space-y-6">
@@ -26,8 +26,8 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                         </div>
                         <div>
                             <h3 class="font-semibold text-foreground">Email</h3>
-                            <p class="text-sm text-muted-foreground">inquiries@lanchain.ai</p>
-                            <p class="text-sm text-muted-foreground">support@lanchain.ai</p>
+                            <p class="text-sm text-muted-foreground">inquiries@LandChain.ai</p>
+                            <p class="text-sm text-muted-foreground">support@LandChain.ai</p>
                         </div>
                     </div>
                     

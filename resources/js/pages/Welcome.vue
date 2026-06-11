@@ -9,7 +9,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
 <template>
     <PublicLayout>
-        <Head title="LanChain AI - Smart Property Registration & Verification" />
+        <Head title="LandChain AI - Smart Property Registration & Verification" />
         
         <!-- Hero Section -->
         <section class="relative px-6 md:px-12 py-20 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden">
@@ -24,7 +24,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
             </h1>
             
             <p class="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
-                LanChain AI leverages Blockchain and AI to eliminate fraud, ensuring smart, transparent, and secure property transactions.
+                LandChain AI leverages Blockchain and AI to eliminate fraud, ensuring smart, transparent, and secure property transactions.
             </p>
             
             <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -94,7 +94,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-col md:flex-row items-center gap-16">
                     <div class="w-full md:w-1/2">
-                        <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-6">How LanChain AI Works</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-6">How LandChain AI Works</h2>
                         <p class="text-lg text-muted-foreground mb-10 leading-relaxed">
                             A simple, secure, and modern approach to property management. Follow these steps to register or verify a property natively on our platform.
                         </p>

@@ -15,7 +15,7 @@ defineProps<{
         <header class="py-4 px-6 md:px-12 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50">
             <Link href="/" class="flex items-center gap-2">
                 <AppLogoIcon class="w-8 h-8 text-primary" />
-                <span class="font-bold text-xl text-primary drop-shadow-sm">LanChain AI</span>
+                <span class="font-bold text-xl text-primary drop-shadow-sm">LandChain AI</span>
             </Link>
             
             <nav class="hidden md:flex items-center gap-6">
@@ -53,13 +53,13 @@ defineProps<{
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-2 mb-4">
                         <AppLogoIcon class="w-6 h-6 text-primary" />
-                        <span class="font-bold text-lg text-primary">LanChain AI</span>
+                        <span class="font-bold text-lg text-primary">LandChain AI</span>
                     </div>
                     <p class="text-muted-foreground text-sm max-w-sm mb-4">
                         Smart Property Registration & Verification System powered by AI and Blockchain technology.
                     </p>
                     <div class="text-xs text-muted-foreground">
-                        &copy; {{ new Date().getFullYear() }} LanChain AI. All rights reserved.
+                        &copy; {{ new Date().getFullYear() }} LandChain AI. All rights reserved.
                     </div>
                 </div>
                 

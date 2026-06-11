@@ -5,7 +5,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
 <template>
     <PublicLayout>
-        <Head title="Privacy Policy - LanChain AI" />
+        <Head title="Privacy Policy - LandChain AI" />
 
         <!-- Header Section -->
         <section class="bg-[#1E293B] text-white py-16 px-6 md:px-12 text-center">
@@ -17,7 +17,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
         <section class="max-w-4xl mx-auto px-6 md:px-12 py-20">
             <div class="prose prose-slate dark:prose-invert max-w-none">
                 <p>
-                    LanChain AI operates the Smart Property Registration and Verification System. 
+                    LandChain AI operates the Smart Property Registration and Verification System. 
                     This page informs you of our policies regarding the collection, use, and disclosure of personal and property data 
                     when you use our Service and the choices you have associated with that data.
                 </p>
@@ -43,7 +43,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                 <p>
                     While we provide a secure platform and AI-driven anomaly detection, users are solely responsible for 
                     the accuracy of the data they submit. Fraudulent submissions will be reported to the relevant government 
-                    authorities. LanChain AI provides tools for verification but does not legally adjudicate property disputes.
+                    authorities. LandChain AI provides tools for verification but does not legally adjudicate property disputes.
                 </p>
 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">4. Changes To This Privacy Policy</h2>

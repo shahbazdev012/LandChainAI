@@ -6,11 +6,11 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
 <template>
     <PublicLayout>
-        <Head title="About Us - LanChain AI" />
+        <Head title="About Us - LandChain AI" />
 
         <!-- Header Section -->
         <section class="bg-primary text-primary-foreground py-20 px-6 md:px-12 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6">About LanChain AI</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">About LandChain AI</h1>
             <p class="text-xl max-w-3xl mx-auto text-primary-foreground/90">
                 Pioneering a secure, transparent, and intelligent era for property registration worldwide.
             </p>
@@ -33,9 +33,9 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                     <div class="h-12 w-12 bg-success/10 text-success flex items-center justify-center rounded-xl mb-6">
                         <Shield class="w-6 h-6" />
                     </div>
-                    <h2 class="text-3xl font-bold text-foreground mb-4">The Solution: LanChain AI</h2>
+                    <h2 class="text-3xl font-bold text-foreground mb-4">The Solution: LandChain AI</h2>
                     <p class="text-muted-foreground text-lg mb-6 leading-relaxed">
-                        We replace outdated ledgers with immutable Blockchain technology and power our verification process with cutting-edge AI. LanChain ensures that property titles are indisputable, completely transparent, and transferable with just a few clicks rather than weeks of paperwork.
+                        We replace outdated ledgers with immutable Blockchain technology and power our verification process with cutting-edge AI. LandChain ensures that property titles are indisputable, completely transparent, and transferable with just a few clicks rather than weeks of paperwork.
                     </p>
                 </div>
             </div>

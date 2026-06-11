@@ -5,7 +5,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
 <template>
     <PublicLayout>
-        <Head title="Terms and Conditions - LanChain AI" />
+        <Head title="Terms and Conditions - LandChain AI" />
 
         <!-- Header Section -->
         <section class="bg-[#1E293B] text-white py-16 px-6 md:px-12 text-center">
@@ -17,7 +17,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
         <section class="max-w-4xl mx-auto px-6 md:px-12 py-20">
             <div class="prose prose-slate dark:prose-invert max-w-none">
                 <p>
-                    Welcome to LanChain AI. These Terms and Conditions govern your use of our Smart Property Registration and Verification System. By accessing or using our Service, you agree to be bound by these Terms.
+                    Welcome to LandChain AI. These Terms and Conditions govern your use of our Smart Property Registration and Verification System. By accessing or using our Service, you agree to be bound by these Terms.
                 </p>
 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">1. User Accounts and Responsibilities</h2>
@@ -27,7 +27,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">2. Fake Documents and Account Termination</h2>
                 <p>
-                    Integrity and trust are the foundation of LanChain AI. Under no circumstances are users permitted to upload, publish, or submit false, forged, or fraudulent property documents. 
+                    Integrity and trust are the foundation of LandChain AI. Under no circumstances are users permitted to upload, publish, or submit false, forged, or fraudulent property documents. 
                 </p>
                 <div class="bg-destructive/10 border border-destructive/20 rounded-md p-4 my-4">
                     <strong class="text-destructive block mb-2">Zero Tolerance Policy for Fraud</strong>
@@ -41,7 +41,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">3. Reservation of Rights</h2>
                 <p>
-                    We reserve all rights, title, and interest in and to the LanChain AI platform, its underlying blockchain technology, artificial intelligence models, algorithms, and intellectual property. Nothing in these Terms grants you a right or license to use any of our trademarks, logos, or brand features. 
+                    We reserve all rights, title, and interest in and to the LandChain AI platform, its underlying blockchain technology, artificial intelligence models, algorithms, and intellectual property. Nothing in these Terms grants you a right or license to use any of our trademarks, logos, or brand features. 
                 </p>
                 <p>
                     We reserve the right to refuse service, terminate accounts, or remove or edit content at our sole discretion at any time.
@@ -49,7 +49,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">4. Limitation of Liability</h2>
                 <p>
-                    While our platform strives to provide accurate and secure property verification, LanChain AI acts strictly as a technological facilitator. We are not liable for any financial losses, property disputes, or damages arising from the use or inability to use our Service.
+                    While our platform strives to provide accurate and secure property verification, LandChain AI acts strictly as a technological facilitator. We are not liable for any financial losses, property disputes, or damages arising from the use or inability to use our Service.
                 </p>
 
                 <h2 class="text-2xl font-semibold mt-10 mb-4 text-foreground">5. Modifications to Terms</h2>

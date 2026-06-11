@@ -16,7 +16,7 @@ defineProps<{
 
 defineOptions({
     layout: {
-        title: 'Create LanChain AI Account',
+        title: 'Create LandChain AI Account',
         description: 'Enter your details below to create your account',
     },
 });

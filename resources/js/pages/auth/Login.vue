@@ -15,8 +15,8 @@ import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Access LanChain AI',
-        description: 'Secure access to LanChain AI property verification system',
+        title: 'Access LandChain AI',
+        description: 'Secure access to LandChain AI property verification system',
     },
 });
 

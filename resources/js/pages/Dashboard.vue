@@ -21,8 +21,8 @@ defineOptions({
         class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
     >
         <div class="mb-2">
-            <h1 class="text-2xl font-bold text-[#0F172A] dark:text-white">LanChain AI Console</h1>
-            <p class="text-[#64748B] dark:text-[#94A3B8]">Welcome to the LanChain AI Property Verification System.</p>
+            <h1 class="text-2xl font-bold text-[#0F172A] dark:text-white">LandChain AI Console</h1>
+            <p class="text-[#64748B] dark:text-[#94A3B8]">Welcome to the LandChain AI Property Verification System.</p>
         </div>
         
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
