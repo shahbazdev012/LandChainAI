@@ -35,9 +35,9 @@ defineProps<{
                     <Link :href="login()">
                         <Button variant="ghost" size="sm" class="hidden sm:inline-flex">Log in</Button>
                     </Link>
-                    <Link :href="register()">
+                    <!-- <Link :href="register()">
                         <Button size="sm" class="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm">Get Started</Button>
-                    </Link>
+                    </Link> -->
                 </template>
             </div>
         </header>

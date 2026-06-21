@@ -8,8 +8,8 @@ Route::inertia('/contact', 'Contact')->name('contact');
 Route::inertia('/privacy-policy', 'PrivacyPolicy')->name('privacy');
 Route::inertia('/terms', 'Terms')->name('terms');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

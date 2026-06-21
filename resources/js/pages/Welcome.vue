@@ -181,11 +181,11 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                 Join thousands who have already migrated to the most transparent and secure property registration standard.
             </p>
             <div class="flex justify-center gap-4">
-                <Link href="/register">
+                <!-- <Link href="/register">
                     <Button size="lg" class="bg-white text-primary hover:bg-white/90 h-14 px-8 text-lg font-semibold">
                         Create an Account
                     </Button>
-                </Link>
+                </Link> -->
             </div>
         </section>
 
