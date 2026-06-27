@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\Ocr\Contracts\OcrEngine;
+use App\Services\Ocr\OcrManager;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +17,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(OcrManager::class);
+
+        // Resolve the OcrEngine contract to the configured driver so the
+        // verification service can depend on the abstraction, not a concrete.
+        $this->app->bind(OcrEngine::class, fn ($app): OcrEngine => $app->make(OcrManager::class)->driver());
     }
 
     /**

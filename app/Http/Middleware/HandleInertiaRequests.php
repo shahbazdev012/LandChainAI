@@ -40,8 +40,28 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'roles' => $request->user()?->getRoleNames()->values()->all() ?? [],
+            ],
+            'flash' => [
+                'toast' => fn (): ?array => $this->toast($request),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    /**
+     * Translate one-off session flash keys into a single toast payload.
+     *
+     * @return array{type: string, message: string}|null
+     */
+    private function toast(Request $request): ?array
+    {
+        foreach (['success', 'error', 'warning', 'info'] as $type) {
+            if ($request->session()->has($type)) {
+                return ['type' => $type, 'message' => (string) $request->session()->get($type)];
+            }
+        }
+
+        return null;
     }
 }

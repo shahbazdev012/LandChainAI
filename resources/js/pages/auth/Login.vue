@@ -9,14 +9,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
         title: 'Access LandChain AI',
-        description: 'Secure access to LandChain AI property verification system',
+        description:
+            'Secure access to LandChain AI property verification system',
     },
 });
 
