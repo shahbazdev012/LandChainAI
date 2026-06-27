@@ -11,9 +11,11 @@ import {
 } from '@lucide/vue';
 import { computed } from 'vue';
 import InputError from '@/components/InputError.vue';
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { index, verify } from '@/routes/verify-property';
 import type { PublicProperty, VerificationResult } from '@/types';
@@ -64,6 +66,8 @@ const details = computed(() => [
 <template>
     <PublicLayout>
         <Head :title="`Verify ${property.property_number}`" />
+
+        <LoadingOverlay :show="form.processing" message="Verifying your document — this can take a few seconds…" />
 
         <section class="mx-auto w-full max-w-3xl px-6 py-10 md:px-12">
             <Button
@@ -127,7 +131,8 @@ const details = computed(() => [
                                 type="submit"
                                 :disabled="form.processing || !form.document"
                             >
-                                <Upload class="size-4" />
+                                <Spinner v-if="form.processing" class="size-4" />
+                                <Upload v-else class="size-4" />
                                 {{
                                     form.processing
                                         ? 'Verifying…'
@@ -174,7 +179,7 @@ const details = computed(() => [
                                 {{
                                     isVerified
                                         ? 'Your document matches the official registry record.'
-                                        : 'Your document could not be verified against the record.'
+                                        : 'This document was not accepted — it does not match the official record, or it is not a valid ownership document. See the checks below.'
                                 }}
                             </p>
                         </div>

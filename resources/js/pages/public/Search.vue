@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ArrowRight, Building2, ScanLine, Search, ShieldCheck, Upload } from '@lucide/vue';
-import { reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import InputError from '@/components/InputError.vue';
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { index, scan, show, verifyScan } from '@/routes/verify-property';
 import type { PublicPropertySummary } from '@/types';
@@ -45,8 +47,31 @@ function submitScan(): void {
     scanForm.post(scan().url, { forceFormData: true });
 }
 
+const detectedSomething = computed(
+    () => !!(props.extracted && (props.extracted.owner_name || props.extracted.owner_cnic || props.extracted.property_number)),
+);
+
+const noResultTitle = computed(() =>
+    props.scanned && !detectedSomething.value ? 'Could not read your document' : 'No approved property matched',
+);
+
+const noResultDescription = computed(() =>
+    props.scanned && !detectedSomething.value
+        ? 'We could not read valid property details from this image. Make sure it is your ownership document and the photo/scan is clear, then try again.'
+        : 'We read the details but found no matching approved record. Check the document, or search manually below.',
+);
+
+const verifying = ref(false);
+
 function verifyMatch(id: number): void {
-    router.post(verifyScan(id).url);
+    router.post(verifyScan(id).url, {}, {
+        onStart: () => {
+            verifying.value = true;
+        },
+        onFinish: () => {
+            verifying.value = false;
+        },
+    });
 }
 
 // Manual fallback search
@@ -66,6 +91,11 @@ function submitManual(): void {
 <template>
     <PublicLayout>
         <Head title="Verify a property - LandChain AI" />
+
+        <LoadingOverlay
+            :show="scanForm.processing || verifying"
+            message="Reading your document and verifying — this can take a few seconds…"
+        />
 
         <section class="bg-primary px-6 py-16 text-center text-primary-foreground md:px-12">
             <h1 class="mb-3 text-3xl font-bold md:text-4xl">Verify property ownership</h1>
@@ -95,7 +125,9 @@ function submitManual(): void {
                             <InputError :message="scanForm.errors.document" />
                         </div>
                         <Button type="submit" :disabled="scanForm.processing || !scanForm.document">
-                            <Upload class="size-4" /> {{ scanForm.processing ? 'Reading…' : 'Find my property' }}
+                            <Spinner v-if="scanForm.processing" class="size-4" />
+                            <Upload v-else class="size-4" />
+                            {{ scanForm.processing ? 'Reading…' : 'Find my property' }}
                         </Button>
                     </form>
                 </CardContent>
@@ -123,8 +155,8 @@ function submitManual(): void {
                 <EmptyState
                     v-if="results.length === 0"
                     :icon="Building2"
-                    title="No approved property matched"
-                    description="We couldn't match an approved record. Try a clearer image, or search manually below."
+                    :title="noResultTitle"
+                    :description="noResultDescription"
                 />
 
                 <div v-else class="grid gap-3 sm:grid-cols-2">
@@ -141,7 +173,7 @@ function submitManual(): void {
                             <div><dt class="text-xs text-muted-foreground">Location</dt><dd>{{ p.city }}{{ p.province ? `, ${p.province}` : '' }}</dd></div>
                         </dl>
                         <div class="mt-3">
-                            <Button v-if="scanned" size="sm" class="w-full" @click="verifyMatch(p.id)">
+                            <Button v-if="scanned" size="sm" class="w-full" :disabled="verifying" @click="verifyMatch(p.id)">
                                 <ShieldCheck class="size-4" /> Verify ownership with my document
                             </Button>
                             <Button v-else size="sm" variant="outline" class="w-full" as-child>
