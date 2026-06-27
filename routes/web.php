@@ -3,14 +3,12 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PropertyApprovalController;
 use App\Http\Controllers\PropertyController;
-use App\Http\Controllers\PropertyDocumentController;
-use App\Http\Controllers\PropertyVerificationController;
 use App\Http\Controllers\PublicVerificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public marketing & verification
+| Public marketing
 |--------------------------------------------------------------------------
 */
 Route::inertia('/', 'Welcome')->name('home');
@@ -20,29 +18,32 @@ Route::inertia('/contact', 'Contact')->name('contact');
 Route::inertia('/privacy-policy', 'PrivacyPolicy')->name('privacy');
 Route::inertia('/terms', 'Terms')->name('terms');
 
-Route::get('/verify', PublicVerificationController::class)->name('verify');
+/*
+|--------------------------------------------------------------------------
+| Public ownership verification (no auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('verify-property', [PublicVerificationController::class, 'index'])->name('verify-property.index');
+Route::post('verify-property/scan', [PublicVerificationController::class, 'scan'])
+    ->middleware('throttle:10,1')
+    ->name('verify-property.scan');
+Route::get('verify-property/{property}', [PublicVerificationController::class, 'show'])->name('verify-property.show');
+Route::post('verify-property/{property}/verify', [PublicVerificationController::class, 'verify'])
+    ->middleware('throttle:10,1')
+    ->name('verify-property.verify');
+Route::post('verify-property/{property}/verify-scan', [PublicVerificationController::class, 'verifyScan'])
+    ->middleware('throttle:10,1')
+    ->name('verify-property.verify-scan');
 
 /*
 |--------------------------------------------------------------------------
 | Registry console (staff only)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified', 'role:admin|officer'])->group(function (): void {
+Route::middleware(['auth', 'verified', 'role:admin|officer|data_entry'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::resource('properties', PropertyController::class);
-
-    Route::scopeBindings()->group(function (): void {
-        Route::post('properties/{property}/documents', [PropertyDocumentController::class, 'store'])
-            ->name('properties.documents.store');
-        Route::get('properties/{property}/documents/{document}', [PropertyDocumentController::class, 'show'])
-            ->name('properties.documents.show');
-        Route::delete('properties/{property}/documents/{document}', [PropertyDocumentController::class, 'destroy'])
-            ->name('properties.documents.destroy');
-    });
-
-    Route::post('properties/{property}/verify', [PropertyVerificationController::class, 'store'])
-        ->name('properties.verify');
 
     Route::post('properties/{property}/approve', [PropertyApprovalController::class, 'approve'])
         ->name('properties.approve');

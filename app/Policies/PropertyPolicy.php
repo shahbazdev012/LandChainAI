@@ -8,8 +8,10 @@ use App\Models\Property;
 use App\Models\User;
 
 /**
- * This is an officer-operated registry: both admins and officers manage and
- * verify all properties. Destructive actions are reserved for admins.
+ * Role rules:
+ * - data_entry: create + view only (no update, no approve, no delete).
+ * - officer:    create + update + approve.
+ * - admin:      everything, including delete.
  */
 class PropertyPolicy
 {
@@ -30,20 +32,12 @@ class PropertyPolicy
 
     public function update(User $user, Property $property): bool
     {
-        return $this->isStaff($user);
+        return $user->hasAnyRole(['admin', 'officer']);
     }
 
-    public function verify(User $user, Property $property): bool
-    {
-        return $this->isStaff($user);
-    }
-
-    /**
-     * Final human sign-off after a passing automated check.
-     */
     public function approve(User $user, Property $property): bool
     {
-        return $this->isStaff($user);
+        return $user->hasAnyRole(['admin', 'officer']);
     }
 
     public function delete(User $user, Property $property): bool
@@ -53,6 +47,6 @@ class PropertyPolicy
 
     private function isStaff(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'officer']);
+        return $user->hasAnyRole(['admin', 'officer', 'data_entry']);
     }
 }

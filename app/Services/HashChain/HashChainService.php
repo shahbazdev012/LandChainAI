@@ -114,7 +114,7 @@ class HashChainService
     }
 
     /**
-     * The immutable, hashed representation of a property at registration time.
+     * The immutable, hashed representation of a property at approval time.
      *
      * @return array<string, mixed>
      */
@@ -131,7 +131,7 @@ class HashChainService
             'province' => $property->province,
             'area_value' => $property->area_value,
             'area_unit' => $property->area_unit->value,
-            'registered_by' => $property->registered_by,
+            'created_by' => $property->created_by,
         ];
     }
 

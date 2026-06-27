@@ -42,27 +42,11 @@ class PropertyResource extends JsonResource
                 'color' => $this->status->color(),
             ],
 
-            'registered_by' => $this->whenLoaded('registeredBy', fn () => [
-                'id' => $this->registeredBy->id,
-                'name' => $this->registeredBy->name,
-            ]),
-            'verified_at' => $this->verified_at?->toIso8601String(),
+            'created_by' => $this->whenLoaded('createdBy', fn () => $this->createdBy?->name),
+            'approved_by' => $this->whenLoaded('approvedBy', fn () => $this->approvedBy?->name),
+            'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
 
-            'documents' => $this->whenLoaded(
-                'documents',
-                fn () => PropertyDocumentResource::collection($this->documents)->resolve($request),
-            ),
-            'latest_verification' => $this->whenLoaded(
-                'latestVerification',
-                fn () => $this->latestVerification
-                    ? (new PropertyVerificationResource($this->latestVerification))->resolve($request)
-                    : null,
-            ),
-            'verifications' => $this->whenLoaded(
-                'verifications',
-                fn () => PropertyVerificationResource::collection($this->verifications)->resolve($request),
-            ),
             'block' => $this->whenLoaded(
                 'block',
                 fn () => $this->block

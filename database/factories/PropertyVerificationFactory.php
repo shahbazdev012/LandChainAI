@@ -8,6 +8,7 @@ use App\Enums\VerificationStatus;
 use App\Models\Property;
 use App\Models\PropertyVerification;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<PropertyVerification>
@@ -25,22 +26,21 @@ class PropertyVerificationFactory extends Factory
 
         return [
             'property_id' => Property::factory(),
-            'document_id' => null,
-            'status' => $status,
-            'score' => fake()->numberBetween(40, 100),
-            'checks' => [
-                ['key' => 'required_fields', 'label' => 'Required fields present', 'passed' => true, 'message' => 'All required fields detected.'],
-                ['key' => 'owner_match', 'label' => 'Owner name matches', 'passed' => true, 'message' => 'Owner name found in document.'],
+            'user_id' => null,
+            'image_disk' => 'local',
+            'image_path' => 'verifications/'.Str::uuid()->toString().'.jpg',
+            'ocr_data' => [
+                'score' => fake()->numberBetween(40, 100),
+                'checks' => [],
+                'text_length' => fake()->numberBetween(50, 400),
             ],
-            'extracted' => ['owner_name' => fake()->name(), 'property_number' => fake()->bothify('???-####-#####')],
-            'ocr_text' => fake()->paragraph(),
-            'notes' => null,
-            'run_by' => null,
+            'ai_result' => null,
+            'final_status' => $status,
         ];
     }
 
     public function status(VerificationStatus $status): static
     {
-        return $this->state(fn (): array => ['status' => $status]);
+        return $this->state(fn (): array => ['final_status' => $status]);
     }
 }

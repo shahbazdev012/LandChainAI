@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Plus, Trash2, FileText } from '@lucide/vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +26,6 @@ import type { EnumOption } from '@/types';
 const props = defineProps<{
     typeOptions: EnumOption[];
     areaUnitOptions: EnumOption[];
-    documentTypeOptions: EnumOption[];
 }>();
 
 defineOptions({
@@ -35,26 +33,12 @@ defineOptions({
         breadcrumbs: [
             { title: 'Dashboard', href: dashboard() },
             { title: 'Properties', href: index() },
-            { title: 'Register', href: '' },
+            { title: 'New property', href: '' },
         ],
     },
 });
 
-const form = useForm<{
-    property_number: string;
-    title: string;
-    type: string;
-    description: string;
-    owner_name: string;
-    owner_cnic: string;
-    owner_contact: string;
-    address: string;
-    city: string;
-    province: string;
-    area_value: string;
-    area_unit: string;
-    documents: { type: string; file: File | null }[];
-}>({
+const form = useForm({
     property_number: '',
     title: '',
     type: props.typeOptions[0]?.value ?? '',
@@ -67,41 +51,27 @@ const form = useForm<{
     province: '',
     area_value: '',
     area_unit: props.areaUnitOptions[0]?.value ?? '',
-    documents: [],
 });
 
-function addDocument(): void {
-    form.documents.push({
-        type: props.documentTypeOptions[0]?.value ?? '',
-        file: null,
-    });
-}
-
-function removeDocument(index: number): void {
-    form.documents.splice(index, 1);
-}
-
-function onFile(event: Event, index: number): void {
-    const target = event.target as HTMLInputElement;
-    form.documents[index].file = target.files?.[0] ?? null;
-}
-
 function submit(): void {
-    form.post(store().url, { forceFormData: true });
+    form.post(store().url);
 }
 </script>
 
 <template>
-    <Head title="Register property" />
+    <Head title="New property" />
 
     <form
         class="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4"
         @submit.prevent="submit"
     >
         <div>
-            <h1 class="text-2xl font-bold tracking-tight">Register property</h1>
+            <h1 class="text-2xl font-bold tracking-tight">
+                New property record
+            </h1>
             <p class="text-muted-foreground">
-                Record a property and seal it into the verification chain.
+                Enter the ground-truth data. It will be sent to an Officer for
+                approval.
             </p>
         </div>
 
@@ -109,15 +79,13 @@ function submit(): void {
             <CardHeader>
                 <CardTitle>Property details</CardTitle>
                 <CardDescription
-                    >The official parcel number must match the uploaded
-                    documents.</CardDescription
+                    >The plot/parcel number must be unique in the
+                    registry.</CardDescription
                 >
             </CardHeader>
             <CardContent class="grid gap-4 sm:grid-cols-2">
                 <div class="grid gap-2">
-                    <Label for="property_number"
-                        >Property / parcel number</Label
-                    >
+                    <Label for="property_number">Plot / property number</Label>
                     <Input
                         id="property_number"
                         v-model="form.property_number"
@@ -258,92 +226,12 @@ function submit(): void {
             </CardContent>
         </Card>
 
-        <Card>
-            <CardHeader>
-                <CardTitle
-                    >Documents
-                    <span class="text-muted-foreground"
-                        >(optional)</span
-                    ></CardTitle
-                >
-                <CardDescription
-                    >Upload ownership documents. Image scans (JPG/PNG) give the
-                    best AI verification results.</CardDescription
-                >
-            </CardHeader>
-            <CardContent class="space-y-3">
-                <div
-                    v-for="(doc, i) in form.documents"
-                    :key="i"
-                    class="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
-                >
-                    <div class="grid gap-2 sm:w-48">
-                        <Label :for="`doc-type-${i}`">Document type</Label>
-                        <Select v-model="doc.type">
-                            <SelectTrigger :id="`doc-type-${i}`"
-                                ><SelectValue
-                            /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="o in documentTypeOptions"
-                                    :key="o.value"
-                                    :value="o.value"
-                                    >{{ o.label }}</SelectItem
-                                >
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div class="grid flex-1 gap-2">
-                        <Label :for="`doc-file-${i}`">File</Label>
-                        <input
-                            :id="`doc-file-${i}`"
-                            type="file"
-                            accept=".jpg,.jpeg,.png,.pdf"
-                            class="w-full rounded-md border border-input bg-transparent text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted/80"
-                            @input="onFile($event, i)"
-                        />
-                        <InputError
-                            :message="
-                                (form.errors as Record<string, string>)[
-                                    `documents.${i}.file`
-                                ]
-                            "
-                        />
-                    </div>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        class="text-muted-foreground"
-                        @click="removeDocument(i)"
-                    >
-                        <Trash2 class="size-4" />
-                    </Button>
-                </div>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    @click="addDocument"
-                >
-                    <Plus class="size-4" /> Add document
-                </Button>
-                <p
-                    v-if="form.documents.length === 0"
-                    class="flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                    <FileText class="size-4" /> No documents added yet.
-                </p>
-            </CardContent>
-        </Card>
-
         <div class="flex items-center justify-end gap-3">
             <Button type="button" variant="ghost" as-child
                 ><Link :href="index()">Cancel</Link></Button
             >
             <Button type="submit" :disabled="form.processing"
-                >Register property</Button
+                >Create &amp; submit for approval</Button
             >
         </div>
     </form>

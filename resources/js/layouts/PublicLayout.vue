@@ -41,7 +41,7 @@ defineProps<{
                     >Features</Link
                 >
                 <Link
-                    href="/verify"
+                    href="/verify-property"
                     class="text-sm font-medium transition-colors hover:text-primary"
                     >Verify</Link
                 >
@@ -53,7 +53,7 @@ defineProps<{
             </nav>
 
             <div class="flex items-center gap-3">
-                <Link href="/verify" class="hidden sm:inline-flex">
+                <Link href="/verify-property" class="hidden sm:inline-flex">
                     <Button variant="outline" size="sm"
                         >Verify a property</Button
                     >
@@ -133,7 +133,7 @@ defineProps<{
                         </li>
                         <li>
                             <Link
-                                href="/verify"
+                                href="/verify-property"
                                 class="transition-colors hover:text-primary"
                                 >Verify a property</Link
                             >

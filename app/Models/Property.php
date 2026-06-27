@@ -28,12 +28,13 @@ use Illuminate\Support\Carbon;
  * @property string|null $owner_contact
  * @property string $address
  * @property string $city
- * @property string|null $province
+ * @property string $province
  * @property string $area_value
  * @property AreaUnit $area_unit
  * @property PropertyStatus $status
- * @property int $registered_by
- * @property Carbon|null $verified_at
+ * @property int $created_by
+ * @property int|null $approved_by
+ * @property Carbon|null $approved_at
  */
 class Property extends Model
 {
@@ -54,8 +55,9 @@ class Property extends Model
         'area_value',
         'area_unit',
         'status',
-        'registered_by',
-        'verified_at',
+        'created_by',
+        'approved_by',
+        'approved_at',
     ];
 
     /**
@@ -68,24 +70,24 @@ class Property extends Model
             'area_unit' => AreaUnit::class,
             'status' => PropertyStatus::class,
             'area_value' => 'decimal:2',
-            'verified_at' => 'datetime',
+            'approved_at' => 'datetime',
         ];
     }
 
     /**
      * @return BelongsTo<User, $this>
      */
-    public function registeredBy(): BelongsTo
+    public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'registered_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
-     * @return HasMany<PropertyDocument, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function documents(): HasMany
+    public function approvedBy(): BelongsTo
     {
-        return $this->hasMany(PropertyDocument::class);
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     /**
@@ -97,14 +99,6 @@ class Property extends Model
     }
 
     /**
-     * @return HasOne<PropertyVerification, $this>
-     */
-    public function latestVerification(): HasOne
-    {
-        return $this->hasOne(PropertyVerification::class)->latestOfMany();
-    }
-
-    /**
      * @return HasOne<PropertyBlock, $this>
      */
     public function block(): HasOne
@@ -112,13 +106,13 @@ class Property extends Model
         return $this->hasOne(PropertyBlock::class);
     }
 
-    public function isVerified(): bool
+    public function isApproved(): bool
     {
-        return $this->status === PropertyStatus::Verified;
+        return $this->status === PropertyStatus::Approved;
     }
 
     /**
-     * Free-text search across the human-meaningful columns.
+     * Staff-side free-text search.
      *
      * @param  Builder<Property>  $query
      * @return Builder<Property>
@@ -138,8 +132,7 @@ class Property extends Model
                 ->orWhere('title', 'like', $like)
                 ->orWhere('owner_name', 'like', $like)
                 ->orWhere('owner_cnic', 'like', $like)
-                ->orWhere('city', 'like', $like)
-                ->orWhere('address', 'like', $like);
+                ->orWhere('city', 'like', $like);
         });
     }
 
@@ -150,5 +143,41 @@ class Property extends Model
     public function scopeStatus(Builder $query, ?string $status): Builder
     {
         return $status ? $query->where('status', $status) : $query;
+    }
+
+    /**
+     * Public lookup: approved records only, filtered by the given criteria.
+     * Returns no rows unless at least one filter is supplied.
+     *
+     * @param  Builder<Property>  $query
+     * @param  array<string, string|null>  $filters
+     * @return Builder<Property>
+     */
+    public function scopePublicSearch(Builder $query, array $filters): Builder
+    {
+        $map = [
+            'owner_cnic' => 'owner_cnic',
+            'owner_name' => 'owner_name',
+            'property_number' => 'property_number',
+            'city' => 'city',
+            'province' => 'province',
+        ];
+
+        $applied = false;
+
+        foreach ($map as $key => $column) {
+            $value = trim((string) ($filters[$key] ?? ''));
+
+            if ($value !== '') {
+                $query->where($column, 'like', '%'.$value.'%');
+                $applied = true;
+            }
+        }
+
+        if (! $applied) {
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query->where('status', PropertyStatus::Approved->value);
     }
 }

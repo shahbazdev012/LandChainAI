@@ -7,24 +7,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Public users' ownership-verification attempts against an approved property.
+     */
     public function up(): void
     {
         Schema::create('property_verifications', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('property_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('document_id')->nullable()
-                ->constrained('property_documents')->nullOnDelete();
+            // Nullable: guests may verify without an account.
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
 
-            $table->enum('status', array_column(VerificationStatus::cases(), 'value'));
-            $table->unsignedTinyInteger('score'); // 0-100 confidence
+            $table->string('image_disk')->default('local');
+            $table->string('image_path');
 
-            // Structured rule results and OCR-extracted fields for auditability.
-            $table->json('checks');
-            $table->json('extracted')->nullable();
-            $table->longText('ocr_text')->nullable();
-            $table->text('notes')->nullable();
+            // Rule-based OCR comparison output and (optional) Gemini AI verdict.
+            $table->json('ocr_data');
+            $table->json('ai_result')->nullable();
 
-            $table->foreignId('run_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->enum('final_status', array_column(VerificationStatus::cases(), 'value'));
+
             $table->timestamps();
 
             $table->index(['property_id', 'created_at']);

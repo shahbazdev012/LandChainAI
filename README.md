@@ -21,23 +21,32 @@ authenticity can be publicly verified.
 
 | Table | Purpose |
 | --- | --- |
-| `properties` | The registry record (parcel number, owner identity, location, area, status). |
-| `property_documents` | Ownership documents stored on a **private** disk; never publicly served. |
-| `property_verifications` | Each AI verification run: status, score, per-check breakdown, OCR text. |
-| `property_blocks` | The append-only hash-chain ledger. One immutable block per property. |
+| `properties` | The ground-truth registry record (plot number, owner identity, location, area, status, created_by, approved_by). |
+| `property_verifications` | Public users' ownership-verification attempts: uploaded image, OCR data, AI result, final status. |
+| `property_blocks` | The append-only hash-chain ledger. One immutable block per **approved** property. |
 
-Lifecycle status: `Pending → Verified / Suspicious / Rejected`.
+Property lifecycle (admin side): `Pending Approval → Approved` (or `Rejected`).
+Public verification outcome: `Verified / Rejected`.
 
 ## Access model
 
-This is an **officer-operated** registry (public self-registration is disabled).
+Two sides:
+
+**Staff (admin side)** — roles:
 
 | Role | Capabilities |
 | --- | --- |
-| `admin` | Full access, including deleting properties. |
-| `officer` | Register, edit, verify and manage properties. |
+| `data_entry` | Create property records only. **Cannot** edit, approve, or upload. |
+| `officer` | Create, edit, and approve/reject records. |
+| `admin` | Everything, including deleting records. |
 
-Property **search & authenticity verification is public** at `/verify` (by registration number or block hash).
+Flow: Data Entry enters text data → `Pending Approval` → an Officer reviews the text and **Approves**
+(→ `Approved`, sealed into the hash chain) or **Rejects** it (Officer/Admin then correct & re-approve).
+No images or OCR on the staff side.
+
+**Public (citizen side)** — no login required, at `/verify-property`:
+search approved records (by CNIC, owner, plot number, city, province) → open a record → upload an
+ownership document → automated verification returns **VERIFIED / REJECTED**.
 
 ### Seeded credentials
 
@@ -45,26 +54,56 @@ Property **search & authenticity verification is public** at `/verify` (by regis
 | --- | --- | --- |
 | Admin | `admin@admin.com` | `password123` |
 | Officer | `officer@landchain.test` | `password123` |
+| Data Entry | `dataentry@landchain.test` | `password123` |
 
-## How verification works
+## How public verification works
 
-1. The officer uploads a document (image scans give the best OCR results) and runs verification.
-2. `VerificationService` extracts text via the configured OCR engine, then runs weighted checks
-   against the registry record — property number, owner name, owner CNIC, and OCR quality
-   (weights/thresholds live in `config/verification.php`).
-3. The checks produce a 0–100 confidence score mapped to **Verified / Suspicious / Rejected**.
+Primary flow — **upload once on `/verify-property`**:
+1. A citizen uploads their ownership document on the search page.
+2. `DocumentScanner` reads the identifying fields off the image — owner name, **CNIC**, plot number —
+   using **Gemini** (handles handwriting) with an **OCR + regex** fallback (recovers the CNIC at least).
+3. Those fields become the search filters against **approved** records:
+   - **one match** → the same image is verified immediately and the result is shown;
+   - **several matches** → listed with a one-click "Verify" that **reuses the uploaded image** (no re-upload);
+   - **no match** → the detected fields are shown and manual search is offered.
+4. Verification (`VerificationService`) combines OCR comparison + the Gemini cross-check
+   (`{match, confidence, issues, notes}`) into a binary **VERIFIED / REJECTED**, stored on
+   `property_verifications` (nullable `user_id` for guests) for audit and shown with reasons.
 
-The OCR engine is pluggable (`config/ocr.php`):
+Manual filter search, and uploading directly on a property's detail page, remain as fallbacks.
 
-- `tesseract` (default) — real OCR via the Tesseract binary.
-- `fake` — deterministic text for tests/CI (set automatically in `phpunit.xml`).
+This is **automated OCR + (optional) AI cross-check** — accurate framing: "AI-assisted verification",
+not "AI decides alone". With no `GEMINI_API_KEY`, it falls back to OCR only; any OCR/Gemini failure
+degrades gracefully instead of crashing.
 
-If the Tesseract binary is unavailable at runtime, verification degrades gracefully
-(records a *Suspicious* result with a reviewer note) instead of failing.
+The OCR engine is pluggable (`config/ocr.php`): `tesseract` (default, real) or `fake` (tests/CI).
+The AI cross-check is optional (`config/services.php` → `gemini`): **no `GEMINI_API_KEY` → OCR only.**
+Any OCR or Gemini failure degrades gracefully (records a reviewer note) instead of crashing.
+
+## Demo data
+
+`migrate:fresh --seed` loads a curated set of realistic records (Pakistani housing
+societies/colonies) — 5 **approved**, 3 **pending approval**, 2 **rejected**.
+
+Each **approved** record has a matching sample title-deed image under `public/demo/`
+(served at `/demo/...`) so you can demonstrate the public verification end-to-end:
+
+| Plot no. | Owner | Owner CNIC | Location | Sample deed |
+| --- | --- | --- | --- | --- |
+| `DHA-5C-1207` | Imran Yousaf | 35201-1234567-1 | DHA Phase 5, Lahore | `/demo/deed-dha-5c-1207.png` |
+| `BTK-P4-0889` | Sana Riaz | 42101-7654321-2 | Bahria Town, Karachi | `/demo/deed-btk-p4-0889.png` |
+| `GLB3-MB-045` | Tariq Mehmood | 35202-2233445-6 | Gulberg III, Lahore | `/demo/deed-glb3-mb-045.png` |
+| `F11-3-220` | Ayesha Khan | 61101-9988776-5 | F-11/3, Islamabad | `/demo/deed-f11-3-220.png` |
+| `JT-G4-512` | Bilal Ahmed | 35202-5566778-9 | Johar Town, Lahore | `/demo/deed-jt-g4-512.png` |
+
+**To demo a VERIFIED result:** open `/verify-property`, **upload the matching deed** from `/demo/...`
+(e.g. `deed-dha-5c-1207.png`). The system reads the owner/CNIC/plot off the image, finds the single
+matching approved record, and shows **VERIFIED** automatically. Upload an unrelated image (or a
+*different* deed against a property you reach via manual search) to get **REJECTED**.
 
 ## How the hash chain works
 
-Each registered property is sealed into `property_blocks` by `HashChainService`:
+Each **approved** property is sealed into `property_blocks` by `HashChainService`:
 
 - A block stores an immutable **snapshot** of the property plus a **SHA-256** hash computed
   over that snapshot **and the previous block's hash** (genesis = 64 zeros).

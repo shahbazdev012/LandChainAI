@@ -13,14 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $property_id
- * @property int|null $document_id
- * @property VerificationStatus $status
- * @property int $score
- * @property array<int, array{key: string, label: string, passed: bool, message: string}> $checks
- * @property array<string, mixed>|null $extracted
- * @property string|null $ocr_text
- * @property string|null $notes
- * @property int|null $run_by
+ * @property int|null $user_id
+ * @property string $image_disk
+ * @property string $image_path
+ * @property array<string, mixed> $ocr_data
+ * @property array<string, mixed>|null $ai_result
+ * @property VerificationStatus $final_status
  */
 class PropertyVerification extends Model
 {
@@ -28,14 +26,13 @@ class PropertyVerification extends Model
     use HasFactory;
 
     protected $fillable = [
-        'document_id',
-        'status',
-        'score',
-        'checks',
-        'extracted',
-        'ocr_text',
-        'notes',
-        'run_by',
+        'property_id',
+        'user_id',
+        'image_disk',
+        'image_path',
+        'ocr_data',
+        'ai_result',
+        'final_status',
     ];
 
     /**
@@ -44,10 +41,9 @@ class PropertyVerification extends Model
     protected function casts(): array
     {
         return [
-            'status' => VerificationStatus::class,
-            'score' => 'integer',
-            'checks' => 'array',
-            'extracted' => 'array',
+            'ocr_data' => 'array',
+            'ai_result' => 'array',
+            'final_status' => VerificationStatus::class,
         ];
     }
 
@@ -60,18 +56,10 @@ class PropertyVerification extends Model
     }
 
     /**
-     * @return BelongsTo<PropertyDocument, $this>
-     */
-    public function document(): BelongsTo
-    {
-        return $this->belongsTo(PropertyDocument::class, 'document_id');
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
-    public function runBy(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'run_by');
+        return $this->belongsTo(User::class);
     }
 }

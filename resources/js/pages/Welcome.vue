@@ -59,7 +59,7 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                         Register Property
                     </Button>
                 </Link>
-                <Link href="/verify">
+                <Link href="/verify-property">
                     <Button
                         size="lg"
                         variant="outline"

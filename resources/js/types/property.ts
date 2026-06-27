@@ -23,29 +23,12 @@ export type VerificationCheck = {
     max_points: number;
 };
 
-export type PropertyVerification = {
-    id: number;
-    status: StatusBadge;
-    score: number;
-    checks: VerificationCheck[];
-    extracted: Record<string, unknown> | null;
+export type AiCrossCheck = {
+    provider: string;
+    match: boolean | null;
+    confidence: number | null;
+    issues: string[];
     notes: string | null;
-    document_id: number | null;
-    run_by?: string | null;
-    created_at: string | null;
-};
-
-export type PropertyDocument = {
-    id: number;
-    type: LabelledValue;
-    original_name: string;
-    mime_type: string;
-    size: number;
-    size_label: string;
-    is_image: boolean;
-    file_hash: string;
-    download_url: string;
-    created_at: string | null;
 };
 
 export type PropertyBlock = {
@@ -55,6 +38,7 @@ export type PropertyBlock = {
     created_at: string | null;
 };
 
+/** Staff-side property record (ground truth). */
 export type Property = {
     id: number;
     property_number: string;
@@ -71,13 +55,40 @@ export type Property = {
     area_unit: LabelledValue;
     area_label: string;
     status: StatusBadge;
-    registered_by?: { id: number; name: string };
-    verified_at: string | null;
+    created_by?: string;
+    approved_by?: string | null;
+    approved_at: string | null;
     created_at: string | null;
-    documents?: PropertyDocument[];
-    latest_verification?: PropertyVerification | null;
-    verifications?: PropertyVerification[];
     block?: PropertyBlock | null;
+};
+
+/** Public search result (masked, approved only). */
+export type PublicPropertySummary = {
+    id: number;
+    property_number: string;
+    title: string;
+    type: string;
+    owner_name: string;
+    owner_cnic: string;
+    city: string;
+    province: string;
+};
+
+/** Public detail projection. */
+export type PublicProperty = PublicPropertySummary & {
+    address: string;
+    area_label: string;
+    approved_at: string | null;
+};
+
+/** Public verification result shown to the user after upload. */
+export type VerificationResult = {
+    final_status: StatusBadge;
+    score: number | null;
+    checks: VerificationCheck[];
+    notes: string | null;
+    ai: AiCrossCheck | null;
+    created_at: string | null;
 };
 
 export type ChainReport = {
@@ -85,6 +96,12 @@ export type ChainReport = {
     blocks: number;
     broken_at_sequence: number | null;
     issues: string[];
+};
+
+export type PropertyPermissions = {
+    update: boolean;
+    approve: boolean;
+    delete: boolean;
 };
 
 export type Paginated<T> = {

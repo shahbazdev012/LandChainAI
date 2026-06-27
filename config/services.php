@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Gemini Vision (optional AI document cross-check)
+    |--------------------------------------------------------------------------
+    |
+    | When a key is present the verifier sends the uploaded document image plus
+    | the registry's ground-truth data to Gemini and asks it to judge whether
+    | the document matches and looks authentic. When absent, verification falls
+    | back to OCR + rule-based checks only.
+    */
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'enabled' => env('GEMINI_ENABLED', true),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 30),
+        'confidence_threshold' => (float) env('GEMINI_CONFIDENCE_THRESHOLD', 0.6),
+    ],
+
 ];

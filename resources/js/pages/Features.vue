@@ -99,7 +99,9 @@ const features = [
                     registration number or blockchain hash.
                 </p>
                 <Button size="lg" as-child
-                    ><Link href="/verify">Verify a property</Link></Button
+                    ><Link href="/verify-property"
+                        >Verify a property</Link
+                    ></Button
                 >
             </div>
         </section>

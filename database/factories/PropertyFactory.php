@@ -39,22 +39,24 @@ class PropertyFactory extends Factory
             'province' => fake()->randomElement(['Punjab', 'Sindh', 'KPK', 'Balochistan', 'ICT']),
             'area_value' => fake()->randomFloat(2, 2, 500),
             'area_unit' => fake()->randomElement(AreaUnit::cases()),
-            'status' => PropertyStatus::Pending,
-            'registered_by' => User::factory(),
-            'verified_at' => null,
+            'status' => PropertyStatus::PendingApproval,
+            'created_by' => User::factory(),
+            'approved_by' => null,
+            'approved_at' => null,
         ];
-    }
-
-    public function verified(): static
-    {
-        return $this->state(fn (): array => [
-            'status' => PropertyStatus::Verified,
-            'verified_at' => now(),
-        ]);
     }
 
     public function status(PropertyStatus $status): static
     {
         return $this->state(fn (): array => ['status' => $status]);
+    }
+
+    public function approved(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => PropertyStatus::Approved,
+            'approved_by' => User::factory(),
+            'approved_at' => now(),
+        ]);
     }
 }

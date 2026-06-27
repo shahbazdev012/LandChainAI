@@ -30,9 +30,9 @@ import type { ChainReport, Property } from '@/types';
 defineProps<{
     stats: {
         total: number;
-        verified: number;
+        approved: number;
         pending: number;
-        flagged: number;
+        rejected: number;
     };
     chain: ChainReport;
     recent: { data: Property[] };
@@ -70,20 +70,20 @@ defineOptions({
                 :icon="Building2"
             />
             <StatCard
-                label="Verified"
-                :value="stats.verified"
+                label="Approved"
+                :value="stats.approved"
                 :icon="CheckCircle2"
                 accent="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
             />
             <StatCard
-                label="In review"
+                label="Pending approval"
                 :value="stats.pending"
                 :icon="Clock"
                 accent="bg-amber-500/10 text-amber-600 dark:text-amber-400"
             />
             <StatCard
-                label="Flagged"
-                :value="stats.flagged"
+                label="Rejected"
+                :value="stats.rejected"
                 :icon="ShieldAlert"
                 accent="bg-red-500/10 text-red-600 dark:text-red-400"
             />

@@ -19,7 +19,7 @@ createInertiaApp({
                 'PrivacyPolicy',
                 'Terms',
             ].includes(name):
-            case name.startsWith('verify/'):
+            case name.startsWith('public/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

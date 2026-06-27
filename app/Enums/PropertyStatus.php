@@ -5,47 +5,32 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * Lifecycle state of a registered property.
+ * Approval state of the ground-truth property record (admin side).
  *
- * Draft            – created but not yet submitted into the registry/chain.
- * Pending          – registered and awaiting the automated check.
- * AwaitingApproval – automated check passed; needs a human to approve.
- * Verified         – a reviewer approved the record; trusted.
- * Suspicious       – automated check found inconsistencies (dead end; re-check).
- * Rejected         – automated check failed or the record was rejected.
+ * PendingApproval – created by Data Entry, awaiting Officer review.
+ * Approved        – approved by an Officer; live ground truth (sealed in chain).
+ * Rejected        – rejected by an Officer; Officer/Admin must correct it.
  */
 enum PropertyStatus: string
 {
-    case Draft = 'draft';
-    case Pending = 'pending';
-    case AwaitingApproval = 'awaiting_approval';
-    case Verified = 'verified';
-    case Suspicious = 'suspicious';
+    case PendingApproval = 'pending_approval';
+    case Approved = 'approved';
     case Rejected = 'rejected';
 
     public function label(): string
     {
         return match ($this) {
-            self::Draft => 'Draft',
-            self::Pending => 'Pending Verification',
-            self::AwaitingApproval => 'Awaiting Approval',
-            self::Verified => 'Verified',
-            self::Suspicious => 'Suspicious',
+            self::PendingApproval => 'Pending Approval',
+            self::Approved => 'Approved',
             self::Rejected => 'Rejected',
         };
     }
 
-    /**
-     * Semantic colour token consumed by the UI badge component.
-     */
     public function color(): string
     {
         return match ($this) {
-            self::Draft => 'gray',
-            self::Pending => 'amber',
-            self::AwaitingApproval => 'blue',
-            self::Verified => 'green',
-            self::Suspicious => 'orange',
+            self::PendingApproval => 'amber',
+            self::Approved => 'green',
             self::Rejected => 'red',
         };
     }

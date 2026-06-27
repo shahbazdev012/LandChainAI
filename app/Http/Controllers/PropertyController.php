@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Properties\RegisterProperty;
 use App\Enums\AreaUnit;
-use App\Enums\DocumentType;
 use App\Enums\PropertyStatus;
 use App\Enums\PropertyType;
 use App\Http\Requests\Properties\StorePropertyRequest;
@@ -26,7 +24,6 @@ class PropertyController extends Controller
         $this->authorize('viewAny', Property::class);
 
         $properties = Property::query()
-            ->with('latestVerification')
             ->search($request->string('search')->toString())
             ->status($request->string('status')->toString())
             ->when(
@@ -56,38 +53,45 @@ class PropertyController extends Controller
         return Inertia::render('properties/Create', [
             'typeOptions' => PropertyType::options(),
             'areaUnitOptions' => AreaUnit::options(),
-            'documentTypeOptions' => DocumentType::options(),
         ]);
     }
 
-    public function store(StorePropertyRequest $request, RegisterProperty $action): RedirectResponse
+    public function store(StorePropertyRequest $request): RedirectResponse
     {
-        $property = $action->handle($request->toDto(), $request->user());
+        $property = Property::query()->create([
+            ...$request->validated(),
+            'created_by' => $request->user()->id,
+            'status' => PropertyStatus::PendingApproval,
+        ]);
 
         return to_route('properties.show', $property)
-            ->with('success', "Property {$property->property_number} registered and sealed into the chain.");
+            ->with('success', "Property {$property->property_number} created and sent for approval.");
     }
 
-    public function show(Property $property, HashChainService $chain): Response
+    public function show(Request $request, Property $property, HashChainService $chain): Response
     {
         $this->authorize('view', $property);
 
-        $property->load(['registeredBy', 'documents', 'block', 'verifications.runBy', 'latestVerification']);
+        $property->load(['createdBy', 'approvedBy', 'block']);
 
         return Inertia::render('properties/Show', [
-            'property' => (new PropertyResource($property))->resolve(),
+            'property' => (new PropertyResource($property))->resolve($request),
             'chain' => $chain->verify()->toArray(),
             'blockValid' => $property->block ? $chain->isHashValid($property->block) : null,
-            'documentTypeOptions' => DocumentType::options(),
+            'can' => [
+                'update' => $request->user()->can('update', $property),
+                'approve' => $request->user()->can('approve', $property),
+                'delete' => $request->user()->can('delete', $property),
+            ],
         ]);
     }
 
-    public function edit(Property $property): Response
+    public function edit(Request $request, Property $property): Response
     {
         $this->authorize('update', $property);
 
         return Inertia::render('properties/Edit', [
-            'property' => (new PropertyResource($property))->resolve(),
+            'property' => (new PropertyResource($property))->resolve($request),
             'typeOptions' => PropertyType::options(),
             'areaUnitOptions' => AreaUnit::options(),
         ]);

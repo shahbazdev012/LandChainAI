@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Verification;
 
 use App\Enums\VerificationStatus;
+use App\Services\Verification\Gemini\GeminiResult;
 
 final readonly class VerificationResult
 {
@@ -19,6 +20,7 @@ final readonly class VerificationResult
         public array $extracted,
         public string $ocrText,
         public ?string $notes = null,
+        public ?GeminiResult $ai = null,
     ) {}
 
     /**

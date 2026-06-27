@@ -26,6 +26,11 @@ abstract class TestCase extends BaseTestCase
         return $this->staff('officer');
     }
 
+    protected function dataEntry(): User
+    {
+        return $this->staff('data_entry');
+    }
+
     private function staff(string $role): User
     {
         Role::findOrCreate($role);

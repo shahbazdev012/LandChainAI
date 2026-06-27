@@ -21,7 +21,7 @@ class DashboardController extends Controller
             ->pluck('aggregate', 'status');
 
         $recent = Property::query()
-            ->with('latestVerification')
+            ->with('createdBy')
             ->latest()
             ->limit(6)
             ->get();
@@ -29,12 +29,9 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total' => (int) $counts->sum(),
-                'verified' => (int) $counts->get(PropertyStatus::Verified->value, 0),
-                // "In review" = awaiting the automated check or a human approval.
-                'pending' => (int) $counts->get(PropertyStatus::Pending->value, 0)
-                    + (int) $counts->get(PropertyStatus::AwaitingApproval->value, 0),
-                'flagged' => (int) $counts->get(PropertyStatus::Suspicious->value, 0)
-                    + (int) $counts->get(PropertyStatus::Rejected->value, 0),
+                'approved' => (int) $counts->get(PropertyStatus::Approved->value, 0),
+                'pending' => (int) $counts->get(PropertyStatus::PendingApproval->value, 0),
+                'rejected' => (int) $counts->get(PropertyStatus::Rejected->value, 0),
             ],
             'chain' => $chain->verify()->toArray(),
             'recent' => PropertyResource::collection($recent),

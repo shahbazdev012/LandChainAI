@@ -12,24 +12,18 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
-            [
-                'name' => 'Registry Admin',
-                'email_verified_at' => now(),
-                'password' => Hash::make('password123'),
-            ],
-        );
-        $admin->syncRoles(['admin']);
+        $users = [
+            ['Registry Admin', 'admin@admin.com', 'admin'],
+            ['Registration Officer', 'officer@landchain.test', 'officer'],
+            ['Data Entry Clerk', 'dataentry@landchain.test', 'data_entry'],
+        ];
 
-        $officer = User::firstOrCreate(
-            ['email' => 'officer@landchain.test'],
-            [
-                'name' => 'Registration Officer',
-                'email_verified_at' => now(),
-                'password' => Hash::make('password123'),
-            ],
-        );
-        $officer->syncRoles(['officer']);
+        foreach ($users as [$name, $email, $role]) {
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                ['name' => $name, 'email_verified_at' => now(), 'password' => Hash::make('password123')],
+            );
+            $user->syncRoles([$role]);
+        }
     }
 }

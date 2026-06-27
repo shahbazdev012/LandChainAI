@@ -14,8 +14,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, verify } from '@/routes';
+import { dashboard } from '@/routes';
 import { create, index } from '@/routes/properties';
+import { index as verifyProperty } from '@/routes/verify-property';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -25,7 +26,7 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
-    { title: 'Public verify', href: verify(), icon: ShieldCheck },
+    { title: 'Public verify', href: verifyProperty(), icon: ShieldCheck },
 ];
 </script>
 

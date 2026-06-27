@@ -4,10 +4,10 @@ namespace Tests\Unit;
 
 use App\Enums\VerificationStatus;
 use App\Models\Property;
-use App\Models\PropertyDocument;
 use App\Services\Ocr\Contracts\OcrEngine;
 use App\Services\Ocr\FakeOcrEngine;
 use App\Services\Ocr\OcrException;
+use App\Services\Verification\Gemini\GeminiVisionService;
 use App\Services\Verification\VerificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,7 +18,7 @@ class VerificationServiceTest extends TestCase
 
     private function property(): Property
     {
-        return Property::factory()->create([
+        return Property::factory()->approved()->create([
             'property_number' => 'LHR-7788-99001',
             'owner_name' => 'Ahmed Khan',
             'owner_cnic' => '35201-1234567-8',
@@ -27,18 +27,19 @@ class VerificationServiceTest extends TestCase
 
     private function service(string $ocrText): VerificationService
     {
-        return new VerificationService((new FakeOcrEngine)->always($ocrText), app('config'));
+        return new VerificationService(
+            (new FakeOcrEngine)->always($ocrText),
+            app('config'),
+            app(GeminiVisionService::class),
+        );
     }
 
     public function test_matching_document_is_verified(): void
     {
-        $property = $this->property();
-        $document = PropertyDocument::factory()->for($property)->create();
-
         $text = 'Government Title Deed. Property No: LHR-7788-99001. '
             .'Owner: Ahmed Khan. CNIC: 35201-1234567-8. Issued by the registry office.';
 
-        $result = $this->service($text)->verify($property, $document);
+        $result = $this->service($text)->verify($this->property(), '/tmp/doc.png', 'image/png');
 
         $this->assertSame(VerificationStatus::Verified, $result->status);
         $this->assertGreaterThanOrEqual(80, $result->score);
@@ -46,35 +47,26 @@ class VerificationServiceTest extends TestCase
 
     public function test_unrelated_document_is_rejected(): void
     {
-        $property = $this->property();
-        $document = PropertyDocument::factory()->for($property)->create();
-
         $text = 'This is a completely unrelated document with no matching registry details whatsoever.';
 
-        $result = $this->service($text)->verify($property, $document);
+        $result = $this->service($text)->verify($this->property(), '/tmp/doc.png', 'image/png');
 
         $this->assertSame(VerificationStatus::Rejected, $result->status);
-        $this->assertLessThan(50, $result->score);
     }
 
-    public function test_partial_match_is_suspicious(): void
+    public function test_partial_match_is_rejected_without_ai(): void
     {
-        $property = $this->property();
-        $document = PropertyDocument::factory()->for($property)->create();
-
-        // Correct owner and property number, but a different CNIC.
+        // Correct owner and property number, wrong CNIC -> below the verified
+        // threshold, and with no AI cross-check the outcome is binary Rejected.
         $text = 'Property No: LHR-7788-99001. Owner: Ahmed Khan. CNIC: 00000-0000000-0.';
 
-        $result = $this->service($text)->verify($property, $document);
+        $result = $this->service($text)->verify($this->property(), '/tmp/doc.png', 'image/png');
 
-        $this->assertSame(VerificationStatus::Suspicious, $result->status);
+        $this->assertSame(VerificationStatus::Rejected, $result->status);
     }
 
-    public function test_engine_failure_is_handled_gracefully(): void
+    public function test_engine_failure_without_ai_is_rejected(): void
     {
-        $property = $this->property();
-        $document = PropertyDocument::factory()->for($property)->create();
-
         $failing = new class implements OcrEngine
         {
             public function extract(string $absolutePath): string
@@ -88,9 +80,10 @@ class VerificationServiceTest extends TestCase
             }
         };
 
-        $result = (new VerificationService($failing, app('config')))->verify($property, $document);
+        $result = (new VerificationService($failing, app('config'), app(GeminiVisionService::class)))
+            ->verify($this->property(), '/tmp/doc.png', 'image/png');
 
-        $this->assertSame(VerificationStatus::Suspicious, $result->status);
+        $this->assertSame(VerificationStatus::Rejected, $result->status);
         $this->assertNotNull($result->notes);
     }
 }
