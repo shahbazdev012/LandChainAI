@@ -14,6 +14,7 @@ final readonly class GeminiResult
 {
     /**
      * @param  list<string>  $issues
+     * @param  array{owner_name: string|null, owner_cnic: string|null, property_number: string|null}  $extracted
      * @param  array<string, mixed>|null  $raw
      */
     public function __construct(
@@ -22,6 +23,7 @@ final readonly class GeminiResult
         public ?float $confidence = null,
         public array $issues = [],
         public ?string $notes = null,
+        public array $extracted = ['owner_name' => null, 'owner_cnic' => null, 'property_number' => null],
         public ?string $provider = null,
         public ?string $model = null,
         public ?string $skippedReason = null,

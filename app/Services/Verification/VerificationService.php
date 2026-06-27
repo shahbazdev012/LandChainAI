@@ -30,6 +30,44 @@ class VerificationService
 
     public function verify(Property $property, string $absolutePath, string $mimeType): VerificationResult
     {
+        // Primary path: a single Gemini call reads the document and judges it.
+        // No OCR is run when AI is available — it would just add latency.
+        if ($this->gemini->isConfigured()) {
+            $ai = $this->gemini->crossCheck($absolutePath, $mimeType, $this->groundTruth($property));
+
+            if ($ai->ok) {
+                return $this->resultFromAi($property, $ai);
+            }
+        }
+
+        // Fallback: OCR + rule-based checks (no Gemini key, or the API failed).
+        return $this->resultFromOcr($property, $absolutePath);
+    }
+
+    private function resultFromAi(Property $property, GeminiResult $ai): VerificationResult
+    {
+        // Field checks are computed from the fields Gemini read off the document.
+        $pseudo = $this->pseudoText($ai->extracted);
+        $checks = $this->fieldChecks($property, $pseudo);
+
+        $threshold = (float) $this->config->get('services.gemini.confidence_threshold', 0.6);
+        $verified = $ai->match === true
+            && ($ai->confidence ?? 0.0) >= $threshold
+            && $ai->issues === [];
+
+        return new VerificationResult(
+            status: $verified ? VerificationStatus::Verified : VerificationStatus::Rejected,
+            score: $ai->confidence !== null ? (int) round($ai->confidence * 100) : ($verified ? 100 : 0),
+            checks: $checks,
+            extracted: $ai->extracted,
+            ocrText: '',
+            notes: $ai->notes,
+            ai: $ai,
+        );
+    }
+
+    private function resultFromOcr(Property $property, string $absolutePath): VerificationResult
+    {
         $ocrAvailable = true;
         $text = '';
 
@@ -39,70 +77,50 @@ class VerificationService
             $ocrAvailable = false;
         }
 
-        $normalizedText = $this->normalize($text);
-        $digitStream = $this->digitsOnly($text);
-
         $checks = [
             $this->checkOcrQuality($text),
-            $this->checkPropertyNumber($property, $normalizedText),
-            $this->checkOwnerName($property, $normalizedText),
-            $this->checkOwnerCnic($property, $digitStream),
+            ...$this->fieldChecks($property, $text),
         ];
+        $score = min(100, array_sum(array_map(static fn (CheckResult $c): int => $c->points, $checks)));
 
-        $ocrScore = min(100, array_sum(array_map(static fn (CheckResult $c): int => $c->points, $checks)));
-
-        $ai = $this->gemini->crossCheck($absolutePath, $mimeType, $this->groundTruth($property));
-
-        $status = $this->decide($ocrScore, $ocrAvailable, $ai);
-
-        $score = $ai->ok && $ai->confidence !== null
-            ? (int) round(0.5 * $ocrScore + 0.5 * $ai->confidence * 100)
-            : $ocrScore;
+        $verified = $ocrAvailable && $score >= (int) $this->config->get('verification.thresholds.verified');
 
         return new VerificationResult(
-            status: $status,
+            status: $verified ? VerificationStatus::Verified : VerificationStatus::Rejected,
             score: $score,
             checks: $checks,
-            extracted: [
-                'text_length' => Str::length($text),
-                'ocr_available' => $ocrAvailable,
-                'property_number_found' => $checks[1]->passed,
-                'owner_name_match' => $checks[2]->message,
-                'cnic_found' => $checks[3]->passed,
-            ],
+            extracted: ['text_length' => Str::length($text), 'ocr_available' => $ocrAvailable],
             ocrText: $text,
-            notes: $this->note($ocrAvailable, $ai),
-            ai: $ai->ok ? $ai : null,
+            notes: $ocrAvailable ? null : 'Automated verification could not run (no AI key and OCR unavailable). Please try again later.',
+            ai: null,
         );
     }
 
     /**
-     * Binary decision. With Gemini: verified only if it confirms a match with
-     * high confidence, no flagged issues, and OCR corroborates. Without Gemini:
-     * fall back to the OCR score.
+     * The property-number / owner-name / owner-CNIC checks, run against any
+     * source text (OCR output or the fields Gemini read).
+     *
+     * @return list<CheckResult>
      */
-    private function decide(int $ocrScore, bool $ocrAvailable, GeminiResult $ai): VerificationStatus
+    private function fieldChecks(Property $property, string $text): array
     {
-        $suspicious = (int) $this->config->get('verification.thresholds.suspicious');
-        $verified = (int) $this->config->get('verification.thresholds.verified');
+        return [
+            $this->checkPropertyNumber($property, $this->normalize($text)),
+            $this->checkOwnerName($property, $this->normalize($text)),
+            $this->checkOwnerCnic($property, $this->digitsOnly($text)),
+        ];
+    }
 
-        if ($ai->ok) {
-            $threshold = (float) $this->config->get('services.gemini.confidence_threshold', 0.6);
-            $ocrCorroborates = $ocrAvailable ? $ocrScore >= $suspicious : true;
-
-            $pass = $ai->match === true
-                && ($ai->confidence ?? 0.0) >= $threshold
-                && $ai->issues === []
-                && $ocrCorroborates;
-
-            return $pass ? VerificationStatus::Verified : VerificationStatus::Rejected;
-        }
-
-        if (! $ocrAvailable) {
-            return VerificationStatus::Rejected;
-        }
-
-        return $ocrScore >= $verified ? VerificationStatus::Verified : VerificationStatus::Rejected;
+    /**
+     * @param  array{owner_name: string|null, owner_cnic: string|null, property_number: string|null}  $extracted
+     */
+    private function pseudoText(array $extracted): string
+    {
+        return trim(implode(' ', array_filter([
+            $extracted['owner_name'] ?? null,
+            $extracted['owner_cnic'] ?? null,
+            $extracted['property_number'] ?? null,
+        ])));
     }
 
     private function checkOcrQuality(string $text): CheckResult
@@ -211,23 +229,6 @@ class VerificationService
             'city' => $property->city,
             'province' => $property->province,
         ];
-    }
-
-    private function note(bool $ocrAvailable, GeminiResult $ai): ?string
-    {
-        if (! $ocrAvailable) {
-            return $ai->ok
-                ? 'OCR was unavailable; decision based on the AI vision check.'
-                : 'Automated verification could not run (OCR unavailable and no AI cross-check). Try again later.';
-        }
-
-        if ($ai->ok) {
-            return $ai->notes;
-        }
-
-        return $ai->skippedReason === 'not_configured'
-            ? null
-            : 'AI vision cross-check was skipped ('.$ai->skippedReason.'); decision based on OCR only.';
     }
 
     private function weight(string $key): int

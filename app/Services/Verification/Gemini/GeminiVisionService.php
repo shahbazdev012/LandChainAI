@@ -154,6 +154,11 @@ class GeminiVisionService
             confidence: isset($data['confidence']) ? max(0.0, min(1.0, (float) $data['confidence'])) : null,
             issues: $issues,
             notes: isset($data['notes']) ? (string) $data['notes'] : null,
+            extracted: [
+                'owner_name' => $this->cleanString($data['owner_name'] ?? null),
+                'owner_cnic' => $this->cleanString($data['cnic'] ?? $data['owner_cnic'] ?? null),
+                'property_number' => $this->cleanString($data['property_number'] ?? null),
+            ],
             provider: 'gemini',
             model: (string) $this->config->get('services.gemini.model'),
             raw: $data,
@@ -182,8 +187,11 @@ class GeminiVisionService
           forgery/tampering.
         - Otherwise "match" is TRUE.
 
+        Also read these fields off the document (null if absent): owner_name, cnic, property_number.
+
         Respond ONLY with strict JSON:
-        {"match": true|false, "confidence": 0.0-1.0, "issues": ["..."], "notes": "one sentence"}
+        {"match": true|false, "confidence": 0.0-1.0, "issues": ["..."], "notes": "one sentence",
+         "owner_name": string|null, "cnic": string|null, "property_number": string|null}
         PROMPT;
     }
 
