@@ -36,6 +36,24 @@ class DocumentScanner
     }
 
     /**
+     * Like scan(), but also returns a fraud read from the same Gemini call so
+     * the public lookup flow can flag tampered documents. When Gemini is
+     * unavailable the OCR fallback supplies fields only (fraud read is null).
+     *
+     * @return array{owner_name: string|null, owner_cnic: string|null, property_number: string|null, source: string, fraud_hint: string|null, confidence: string|null}
+     */
+    public function scanWithFraud(string $absolutePath, string $mimeType): array
+    {
+        $fields = $this->gemini->extractWithFraud($absolutePath, $mimeType);
+
+        if ($fields !== null && $this->hasAny($fields)) {
+            return [...$fields, 'source' => 'ai'];
+        }
+
+        return [...$this->ocrFallback($absolutePath), 'source' => 'ocr', 'fraud_hint' => null, 'confidence' => null];
+    }
+
+    /**
      * @param  array{owner_name: string|null, owner_cnic: string|null, property_number: string|null}  $fields
      */
     private function hasAny(array $fields): bool

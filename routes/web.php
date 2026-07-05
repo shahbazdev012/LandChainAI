@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FraudCheckController;
 use App\Http\Controllers\PropertyApprovalController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PublicVerificationController;
@@ -34,6 +35,16 @@ Route::post('verify-property/{property}/verify', [PublicVerificationController::
 Route::post('verify-property/{property}/verify-scan', [PublicVerificationController::class, 'verifyScan'])
     ->middleware('throttle:10,1')
     ->name('verify-property.verify-scan');
+
+/*
+|--------------------------------------------------------------------------
+| Public document fraud check (no auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('fraud-check', [FraudCheckController::class, 'index'])->name('fraud-check.index');
+Route::post('fraud-check', [FraudCheckController::class, 'check'])
+    ->middleware('throttle:10,1')
+    ->name('fraud-check.check');
 
 /*
 |--------------------------------------------------------------------------

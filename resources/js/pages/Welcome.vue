@@ -68,6 +68,15 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
                         Verify Property
                     </Button>
                 </Link>
+                <Link href="/fraud-check">
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        class="h-14 w-full border-2 px-8 text-lg sm:w-auto"
+                    >
+                        Fraud Check
+                    </Button>
+                </Link>
             </div>
         </section>
 

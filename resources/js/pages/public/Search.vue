@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowRight, Building2, ScanLine, Search, ShieldCheck, Upload } from '@lucide/vue';
+import { ArrowRight, Building2, ScanLine, Search, ShieldAlert, ShieldCheck, Upload } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import InputError from '@/components/InputError.vue';
@@ -21,6 +21,11 @@ type Extracted = {
     source: string;
 };
 
+type Fraud = {
+    fraud_hint: string | null;
+    confidence: string | null;
+};
+
 const props = defineProps<{
     filters: {
         owner_cnic: string | null;
@@ -32,8 +37,11 @@ const props = defineProps<{
     hasSearched: boolean;
     results: PublicPropertySummary[];
     extracted: Extracted | null;
+    fraud: Fraud | null;
     scanned: boolean;
 }>();
+
+const fraudGenuine = computed(() => props.fraud?.fraud_hint === 'Document appears genuine');
 
 // Upload-driven scan
 const scanForm = useForm<{ document: File | null }>({ document: null });
@@ -144,6 +152,28 @@ function submitManual(): void {
                         <span>Owner: <span class="font-medium">{{ extracted.owner_name ?? '—' }}</span></span>
                         <span>CNIC: <span class="font-mono font-medium">{{ extracted.owner_cnic ?? '—' }}</span></span>
                         <span>Plot no.: <span class="font-mono font-medium">{{ extracted.property_number ?? '—' }}</span></span>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Fraud detection -->
+            <Card
+                v-if="scanned && fraud && fraud.fraud_hint"
+                class="mt-6"
+                :class="fraudGenuine
+                    ? 'border-emerald-200 dark:border-emerald-500/20'
+                    : 'border-red-200 dark:border-red-500/20'"
+            >
+                <CardContent class="flex items-start gap-3 p-5">
+                    <ShieldCheck v-if="fraudGenuine" class="mt-0.5 size-5 shrink-0 text-emerald-500" />
+                    <ShieldAlert v-else class="mt-0.5 size-5 shrink-0 text-red-500" />
+                    <div>
+                        <p class="text-sm font-semibold" :class="fraudGenuine ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'">
+                            Fraud check: {{ fraud.fraud_hint }}
+                        </p>
+                        <p v-if="fraud.confidence" class="mt-0.5 text-xs text-muted-foreground">
+                            Confidence: {{ fraud.confidence }}
+                        </p>
                     </div>
                 </CardContent>
             </Card>

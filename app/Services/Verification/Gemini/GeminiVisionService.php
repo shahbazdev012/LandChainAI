@@ -85,6 +85,37 @@ class GeminiVisionService
         ];
     }
 
+    /**
+     * Extraction PLUS a lightweight fraud read of the same image in a single
+     * Gemini call (no extra API round-trip). Powers fraud detection in the
+     * public property-lookup flow: a matched property can be flagged for
+     * tampering off the very image used to search.
+     *
+     * @return array{owner_name: string|null, owner_cnic: string|null, property_number: string|null, fraud_hint: string|null, confidence: string|null}|null
+     */
+    public function extractWithFraud(string $absolutePath, string $mimeType): ?array
+    {
+        if (! $this->isConfigured() || ! $this->supports($mimeType) || ! is_readable($absolutePath)) {
+            return null;
+        }
+
+        $response = $this->request($absolutePath, $mimeType, $this->extractWithFraudPrompt());
+
+        if (! $response['ok'] || $response['data'] === null) {
+            return null;
+        }
+
+        $data = $response['data'];
+
+        return [
+            'owner_name' => $this->cleanString($data['owner_name'] ?? null),
+            'owner_cnic' => $this->cleanString($data['cnic'] ?? $data['owner_cnic'] ?? null),
+            'property_number' => $this->cleanString($data['property_number'] ?? $data['plot_number'] ?? null),
+            'fraud_hint' => $this->normalizeFraudHint($data['fraud_hint'] ?? null),
+            'confidence' => $this->normalizeConfidence($data['confidence'] ?? null),
+        ];
+    }
+
     private function supports(string $mimeType): bool
     {
         return in_array(strtolower($mimeType), self::SUPPORTED_MIME, true);
@@ -207,6 +238,56 @@ class GeminiVisionService
         Respond ONLY with strict JSON using null for any field you cannot read:
         {"owner_name": string|null, "cnic": string|null, "property_number": string|null}
         PROMPT;
+    }
+
+    private function extractWithFraudPrompt(): string
+    {
+        return <<<'PROMPT'
+        Read the attached property/ownership document image (it MAY be handwritten).
+        Extract these identifying fields if present:
+        - owner_name: the property owner's full name
+        - cnic: the owner's CNIC / national ID (digits, typically formatted #####-#######-#)
+        - property_number: the plot / property / parcel number
+
+        Also analyze this document image for fraud indicators: blurring, inconsistent
+        fonts, cut-paste signs, tampered text. Return fraud_hint as exactly
+        'Document appears genuine' or 'Inconsistency detected', and confidence as
+        exactly 'High', 'Medium', or 'Low'.
+
+        Respond ONLY with strict JSON using null for any identifying field you cannot read:
+        {"owner_name": string|null, "cnic": string|null, "property_number": string|null,
+         "fraud_hint": "Document appears genuine"|"Inconsistency detected",
+         "confidence": "High"|"Medium"|"Low"}
+        PROMPT;
+    }
+
+    /**
+     * Coerce Gemini's fraud verdict to one of the two allowed labels.
+     */
+    private function normalizeFraudHint(mixed $value): ?string
+    {
+        $value = $this->cleanString($value);
+
+        if ($value === null) {
+            return null;
+        }
+
+        return str_contains(strtolower($value), 'genuine')
+            ? 'Document appears genuine'
+            : 'Inconsistency detected';
+    }
+
+    /**
+     * Coerce Gemini's confidence to exactly High / Medium / Low.
+     */
+    private function normalizeConfidence(mixed $value): ?string
+    {
+        return match (strtolower((string) $this->cleanString($value))) {
+            'high' => 'High',
+            'medium' => 'Medium',
+            'low' => 'Low',
+            default => null,
+        };
     }
 
     private function cleanString(mixed $value): ?string

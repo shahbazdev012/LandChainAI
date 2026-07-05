@@ -44,6 +44,7 @@ class PublicVerificationController extends Controller
             'hasSearched' => $hasSearched,
             'results' => $results,
             'extracted' => null,
+            'fraud' => null,
             'scanned' => false,
         ]);
     }
@@ -61,7 +62,7 @@ class PublicVerificationController extends Controller
         abort_if($path === false, 500, 'The document could not be stored.');
 
         $mime = (string) $file->getMimeType();
-        $extracted = $scanner->scan(Storage::disk('local')->path($path), $mime);
+        $extracted = $scanner->scanWithFraud(Storage::disk('local')->path($path), $mime);
 
         // Keep the uploaded image so a chosen match can be verified without re-uploading.
         $request->session()->put('vp_scan', ['disk' => 'local', 'path' => $path, 'mime' => $mime]);
@@ -82,11 +83,19 @@ class PublicVerificationController extends Controller
             return to_route('verify-property.show', [$property, 'result' => $verification->id]);
         }
 
+        // Fraud detection: no ground-truth match is itself an inconsistency, so we
+        // flag it directly (no extra Gemini call). When matches exist we surface the
+        // fraud read Gemini already produced while extracting the document fields.
+        $fraud = $matches->isEmpty()
+            ? ['fraud_hint' => 'Inconsistency detected', 'confidence' => 'High']
+            : ['fraud_hint' => $extracted['fraud_hint'] ?? null, 'confidence' => $extracted['confidence'] ?? null];
+
         return Inertia::render('public/Search', [
             'filters' => [...$filters, 'city' => null, 'province' => null],
             'hasSearched' => true,
             'scanned' => true,
             'extracted' => $extracted,
+            'fraud' => $fraud,
             'results' => $matches->map(fn (Property $p): array => $this->summary($p))->all(),
         ]);
     }
