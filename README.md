@@ -9,6 +9,65 @@ authenticity can be publicly verified.
 > integrity (SHA-256, append-only ledger) — **not** a distributed ledger, cryptocurrency,
 > or smart-contract system. "AI verification" uses OCR + rule-based validation, not trained ML models.
 
+## Local setup (Laravel Sail)
+
+### 1. Clone & install dependencies
+
+```bash
+git clone <repo-url> LandChainAI
+cd LandChainAI
+
+# PHP dependencies (via a throwaway PHP container, no local PHP needed)
+docker run --rm -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest \
+    composer install --ignore-platform-reqs
+
+# Environment file
+cp .env.example .env
+```
+
+### 2. Add the local virtual host
+
+Point `landchainai.local` at your machine so the app is reachable at a friendly URL
+(edit `/etc/hosts` on Linux/Mac, or `C:\Windows\System32\drivers\etc\hosts` on Windows):
+
+```bash
+echo "127.0.0.1 landchainai.local" | sudo tee -a /etc/hosts
+```
+
+Then set `APP_URL=http://landchainai.local` in `.env`.
+
+### 3. Start Sail (Docker)
+
+```bash
+# First-time boot / after pulling changes to docker config
+./vendor/bin/sail up -d
+
+# Generate the app key (first run only)
+./vendor/bin/sail artisan key:generate
+
+# Install the Tesseract OCR binary inside the app container (required for real OCR)
+docker compose exec -u root laravel.test apt-get update
+docker compose exec -u root laravel.test apt-get install -y tesseract-ocr
+
+# Migrate & seed demo data
+./vendor/bin/sail artisan migrate:fresh --seed
+
+# JS dependencies & front-end assets (or `sail npm run dev` while developing)
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run build
+```
+
+Visit **http://landchainai.local** — sign in at `/login`, or try public verification at `/verify`.
+
+### Everyday commands
+
+```bash
+./vendor/bin/sail up -d          # start containers (background)
+./vendor/bin/sail down           # stop & remove containers
+./vendor/bin/sail artisan migrate   # run new migrations
+./vendor/bin/sail artisan migrate:fresh --seed   # reset DB + reseed demo data
+```
+
 ## Tech stack
 
 - **Laravel 13** (PHP 8.3+), **Inertia** + **Vue 3** + **TypeScript**
@@ -109,25 +168,6 @@ Each **approved** property is sealed into `property_blocks` by `HashChainService
   over that snapshot **and the previous block's hash** (genesis = 64 zeros).
 - `HashChainService::verify()` walks the chain, recomputes every hash, and reports the first
   broken block — so any tampering with a sealed record is detectable.
-
-## Local setup (Laravel Sail)
-
-```bash
-# Start containers
-./vendor/bin/sail up -d
-
-# Install the Tesseract OCR binary inside the app container (required for real OCR)
-docker compose exec -u root laravel.test apt-get update
-docker compose exec -u root laravel.test apt-get install -y tesseract-ocr
-
-# Migrate & seed demo data
-./vendor/bin/sail artisan migrate:fresh --seed
-
-# Build front-end assets (or `sail npm run dev` while developing)
-./vendor/bin/sail npm run build
-```
-
-Visit http://localhost — sign in at `/login`, or try public verification at `/verify`.
 
 ## Quality checks
 
